@@ -1,0 +1,502 @@
+
+TesteFinal.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000002da  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  0000034e  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000008  00800060  00800060  0000034e  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  0000034e  2**0
+                  CONTENTS, READONLY
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000380  2**2
+                  CONTENTS, READONLY
+  5 .debug_aranges 00000050  00000000  00000000  000003bc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   000005fa  00000000  00000000  0000040c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000504  00000000  00000000  00000a06  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   000002f6  00000000  00000000  00000f0a  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000100  00000000  00000000  00001200  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    0000033b  00000000  00000000  00001300  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    000001d4  00000000  00000000  0000163b  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000040  00000000  00000000  0000180f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0e c0       	rjmp	.+28     	; 0x1e <__ctors_end>
+   2:	32 c0       	rjmp	.+100    	; 0x68 <__vector_1>
+   4:	1c c0       	rjmp	.+56     	; 0x3e <__bad_interrupt>
+   6:	55 c0       	rjmp	.+170    	; 0xb2 <__vector_3>
+   8:	1a c0       	rjmp	.+52     	; 0x3e <__bad_interrupt>
+   a:	19 c0       	rjmp	.+50     	; 0x3e <__bad_interrupt>
+   c:	18 c0       	rjmp	.+48     	; 0x3e <__bad_interrupt>
+   e:	17 c0       	rjmp	.+46     	; 0x3e <__bad_interrupt>
+  10:	16 c0       	rjmp	.+44     	; 0x3e <__bad_interrupt>
+  12:	15 c0       	rjmp	.+42     	; 0x3e <__bad_interrupt>
+  14:	14 c0       	rjmp	.+40     	; 0x3e <__bad_interrupt>
+  16:	13 c0       	rjmp	.+38     	; 0x3e <__bad_interrupt>
+  18:	12 c0       	rjmp	.+36     	; 0x3e <__bad_interrupt>
+  1a:	11 c0       	rjmp	.+34     	; 0x3e <__bad_interrupt>
+  1c:	10 c0       	rjmp	.+32     	; 0x3e <__bad_interrupt>
+
+0000001e <__ctors_end>:
+  1e:	11 24       	eor	r1, r1
+  20:	1f be       	out	0x3f, r1	; 63
+  22:	cf e5       	ldi	r28, 0x5F	; 95
+  24:	d2 e0       	ldi	r29, 0x02	; 2
+  26:	de bf       	out	0x3e, r29	; 62
+  28:	cd bf       	out	0x3d, r28	; 61
+
+0000002a <__do_clear_bss>:
+  2a:	20 e0       	ldi	r18, 0x00	; 0
+  2c:	a0 e6       	ldi	r26, 0x60	; 96
+  2e:	b0 e0       	ldi	r27, 0x00	; 0
+  30:	01 c0       	rjmp	.+2      	; 0x34 <.do_clear_bss_start>
+
+00000032 <.do_clear_bss_loop>:
+  32:	1d 92       	st	X+, r1
+
+00000034 <.do_clear_bss_start>:
+  34:	a8 36       	cpi	r26, 0x68	; 104
+  36:	b2 07       	cpc	r27, r18
+  38:	e1 f7       	brne	.-8      	; 0x32 <.do_clear_bss_loop>
+  3a:	14 d1       	rcall	.+552    	; 0x264 <main>
+  3c:	4c c1       	rjmp	.+664    	; 0x2d6 <_exit>
+
+0000003e <__bad_interrupt>:
+  3e:	e0 cf       	rjmp	.-64     	; 0x0 <__vectors>
+
+00000040 <Timer1_init>:
+volatile uint32_t pulse_count = 0;
+
+void Timer1_init()
+{
+	// Definir o Timer1 em modo CTC
+	TCCR1 |= (1 << CTC1) | (1 << CS13) | (1 << CS10);  // Prescaler de 256
+  40:	80 b7       	in	r24, 0x30	; 48
+  42:	89 68       	ori	r24, 0x89	; 137
+  44:	80 bf       	out	0x30, r24	; 48
+
+	// Calcular o valor do OCR1C para 10ms
+	OCR1C = 39;  // Para 1MHz: (1MHz / (256 * 100Hz)) - 1 = 38
+  46:	87 e2       	ldi	r24, 0x27	; 39
+  48:	8d bd       	out	0x2d, r24	; 45
+
+	// Habilitar interrupção de comparação do Timer1
+	TIMSK |= (1 << OCIE1A);
+  4a:	89 b7       	in	r24, 0x39	; 57
+  4c:	80 64       	ori	r24, 0x40	; 64
+  4e:	89 bf       	out	0x39, r24	; 57
+  50:	08 95       	ret
+
+00000052 <Timer0_init>:
+}
+
+void Timer0_init()
+{
+	// Configurar o Timer0 para Fast PWM, modo não invertido
+	TCCR0A |= (1<<COM0A1) | (1<<WGM00) | (1<<WGM01) | (1 << COM0B1);
+  52:	8a b5       	in	r24, 0x2a	; 42
+  54:	83 6a       	ori	r24, 0xA3	; 163
+  56:	8a bd       	out	0x2a, r24	; 42
+	TCCR0B |= (1<<CS01);  // Prescaler de 8 para o Timer0
+  58:	83 b7       	in	r24, 0x33	; 51
+  5a:	82 60       	ori	r24, 0x02	; 2
+  5c:	83 bf       	out	0x33, r24	; 51
+	// Inicializar o valor do PWM
+	OCR0B = 0;
+  5e:	18 bc       	out	0x28, r1	; 40
+	// Configurar o PB0 como saída
+	DDRB |= (1 << PB0) | (1 << PB1);
+  60:	87 b3       	in	r24, 0x17	; 23
+  62:	83 60       	ori	r24, 0x03	; 3
+  64:	87 bb       	out	0x17, r24	; 23
+  66:	08 95       	ret
+
+00000068 <__vector_1>:
+}
+
+ISR(INT0_vect)
+{
+  68:	1f 92       	push	r1
+  6a:	0f 92       	push	r0
+  6c:	0f b6       	in	r0, 0x3f	; 63
+  6e:	0f 92       	push	r0
+  70:	11 24       	eor	r1, r1
+  72:	8f 93       	push	r24
+  74:	9f 93       	push	r25
+  76:	af 93       	push	r26
+  78:	bf 93       	push	r27
+	pulse_count++;  // Contar os pulsos do encoder
+  7a:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+  7e:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+  82:	a0 91 62 00 	lds	r26, 0x0062	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
+  86:	b0 91 63 00 	lds	r27, 0x0063	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
+  8a:	01 96       	adiw	r24, 0x01	; 1
+  8c:	a1 1d       	adc	r26, r1
+  8e:	b1 1d       	adc	r27, r1
+  90:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <__DATA_REGION_ORIGIN__>
+  94:	90 93 61 00 	sts	0x0061, r25	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+  98:	a0 93 62 00 	sts	0x0062, r26	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
+  9c:	b0 93 63 00 	sts	0x0063, r27	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
+}
+  a0:	bf 91       	pop	r27
+  a2:	af 91       	pop	r26
+  a4:	9f 91       	pop	r25
+  a6:	8f 91       	pop	r24
+  a8:	0f 90       	pop	r0
+  aa:	0f be       	out	0x3f, r0	; 63
+  ac:	0f 90       	pop	r0
+  ae:	1f 90       	pop	r1
+  b0:	18 95       	reti
+
+000000b2 <__vector_3>:
+
+ISR(TIMER1_COMPA_vect)
+{
+  b2:	1f 92       	push	r1
+  b4:	0f 92       	push	r0
+  b6:	0f b6       	in	r0, 0x3f	; 63
+  b8:	0f 92       	push	r0
+  ba:	11 24       	eor	r1, r1
+  bc:	cf 92       	push	r12
+  be:	df 92       	push	r13
+  c0:	ef 92       	push	r14
+  c2:	ff 92       	push	r15
+  c4:	2f 93       	push	r18
+  c6:	3f 93       	push	r19
+  c8:	4f 93       	push	r20
+  ca:	5f 93       	push	r21
+  cc:	6f 93       	push	r22
+  ce:	7f 93       	push	r23
+  d0:	8f 93       	push	r24
+  d2:	9f 93       	push	r25
+  d4:	af 93       	push	r26
+  d6:	bf 93       	push	r27
+  d8:	ef 93       	push	r30
+  da:	ff 93       	push	r31
+	count++;
+  dc:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <count>
+  e0:	90 91 65 00 	lds	r25, 0x0065	; 0x800065 <count+0x1>
+  e4:	a0 91 66 00 	lds	r26, 0x0066	; 0x800066 <count+0x2>
+  e8:	b0 91 67 00 	lds	r27, 0x0067	; 0x800067 <count+0x3>
+  ec:	01 96       	adiw	r24, 0x01	; 1
+  ee:	a1 1d       	adc	r26, r1
+  f0:	b1 1d       	adc	r27, r1
+  f2:	80 93 64 00 	sts	0x0064, r24	; 0x800064 <count>
+  f6:	90 93 65 00 	sts	0x0065, r25	; 0x800065 <count+0x1>
+  fa:	a0 93 66 00 	sts	0x0066, r26	; 0x800066 <count+0x2>
+  fe:	b0 93 67 00 	sts	0x0067, r27	; 0x800067 <count+0x3>
+	if (count >= 100)  // 100 * 10ms = 1 segundo
+ 102:	80 91 64 00 	lds	r24, 0x0064	; 0x800064 <count>
+ 106:	90 91 65 00 	lds	r25, 0x0065	; 0x800065 <count+0x1>
+ 10a:	a0 91 66 00 	lds	r26, 0x0066	; 0x800066 <count+0x2>
+ 10e:	b0 91 67 00 	lds	r27, 0x0067	; 0x800067 <count+0x3>
+ 112:	84 36       	cpi	r24, 0x64	; 100
+ 114:	91 05       	cpc	r25, r1
+ 116:	a1 05       	cpc	r26, r1
+ 118:	b1 05       	cpc	r27, r1
+ 11a:	08 f4       	brcc	.+2      	; 0x11e <__vector_3+0x6c>
+ 11c:	81 c0       	rjmp	.+258    	; 0x220 <__DATA_REGION_LENGTH__+0x20>
+	{
+		// Calcular RPM
+		cli();
+ 11e:	f8 94       	cli
+		uint32_t temp = pulse_count;
+ 120:	80 91 60 00 	lds	r24, 0x0060	; 0x800060 <__DATA_REGION_ORIGIN__>
+ 124:	90 91 61 00 	lds	r25, 0x0061	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+ 128:	a0 91 62 00 	lds	r26, 0x0062	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
+ 12c:	b0 91 63 00 	lds	r27, 0x0063	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
+		pulse_count = 0;
+ 130:	10 92 60 00 	sts	0x0060, r1	; 0x800060 <__DATA_REGION_ORIGIN__>
+ 134:	10 92 61 00 	sts	0x0061, r1	; 0x800061 <__DATA_REGION_ORIGIN__+0x1>
+ 138:	10 92 62 00 	sts	0x0062, r1	; 0x800062 <__DATA_REGION_ORIGIN__+0x2>
+ 13c:	10 92 63 00 	sts	0x0063, r1	; 0x800063 <__DATA_REGION_ORIGIN__+0x3>
+		sei();
+ 140:	78 94       	sei
+		uint32_t rpm = (temp * 60) / PULSES_PER_REV;
+ 142:	ac 01       	movw	r20, r24
+ 144:	bd 01       	movw	r22, r26
+ 146:	44 0f       	add	r20, r20
+ 148:	55 1f       	adc	r21, r21
+ 14a:	66 1f       	adc	r22, r22
+ 14c:	77 1f       	adc	r23, r23
+ 14e:	84 0f       	add	r24, r20
+ 150:	95 1f       	adc	r25, r21
+ 152:	a6 1f       	adc	r26, r22
+ 154:	b7 1f       	adc	r27, r23
+ 156:	ac 01       	movw	r20, r24
+ 158:	bd 01       	movw	r22, r26
+ 15a:	44 0f       	add	r20, r20
+ 15c:	55 1f       	adc	r21, r21
+ 15e:	66 1f       	adc	r22, r22
+ 160:	77 1f       	adc	r23, r23
+ 162:	44 0f       	add	r20, r20
+ 164:	55 1f       	adc	r21, r21
+ 166:	66 1f       	adc	r22, r22
+ 168:	77 1f       	adc	r23, r23
+ 16a:	6c 01       	movw	r12, r24
+ 16c:	7d 01       	movw	r14, r26
+ 16e:	c4 0e       	add	r12, r20
+ 170:	d5 1e       	adc	r13, r21
+ 172:	e6 1e       	adc	r14, r22
+ 174:	f7 1e       	adc	r15, r23
+ 176:	c7 01       	movw	r24, r14
+ 178:	b6 01       	movw	r22, r12
+ 17a:	66 0f       	add	r22, r22
+ 17c:	77 1f       	adc	r23, r23
+ 17e:	88 1f       	adc	r24, r24
+ 180:	99 1f       	adc	r25, r25
+ 182:	66 0f       	add	r22, r22
+ 184:	77 1f       	adc	r23, r23
+ 186:	88 1f       	adc	r24, r24
+ 188:	99 1f       	adc	r25, r25
+ 18a:	2c e1       	ldi	r18, 0x1C	; 28
+ 18c:	30 e0       	ldi	r19, 0x00	; 0
+ 18e:	40 e0       	ldi	r20, 0x00	; 0
+ 190:	50 e0       	ldi	r21, 0x00	; 0
+ 192:	7f d0       	rcall	.+254    	; 0x292 <__udivmodsi4>
+
+		// Calcular o valor do PWM
+		uint32_t pwm_value = (rpm * MAX_PWM) / MAX_RPM;
+ 194:	da 01       	movw	r26, r20
+ 196:	c9 01       	movw	r24, r18
+ 198:	88 0f       	add	r24, r24
+ 19a:	99 1f       	adc	r25, r25
+ 19c:	aa 1f       	adc	r26, r26
+ 19e:	bb 1f       	adc	r27, r27
+ 1a0:	88 0f       	add	r24, r24
+ 1a2:	99 1f       	adc	r25, r25
+ 1a4:	aa 1f       	adc	r26, r26
+ 1a6:	bb 1f       	adc	r27, r27
+ 1a8:	88 0f       	add	r24, r24
+ 1aa:	99 1f       	adc	r25, r25
+ 1ac:	aa 1f       	adc	r26, r26
+ 1ae:	bb 1f       	adc	r27, r27
+ 1b0:	88 0f       	add	r24, r24
+ 1b2:	99 1f       	adc	r25, r25
+ 1b4:	aa 1f       	adc	r26, r26
+ 1b6:	bb 1f       	adc	r27, r27
+ 1b8:	88 0f       	add	r24, r24
+ 1ba:	99 1f       	adc	r25, r25
+ 1bc:	aa 1f       	adc	r26, r26
+ 1be:	bb 1f       	adc	r27, r27
+ 1c0:	88 0f       	add	r24, r24
+ 1c2:	99 1f       	adc	r25, r25
+ 1c4:	aa 1f       	adc	r26, r26
+ 1c6:	bb 1f       	adc	r27, r27
+ 1c8:	88 0f       	add	r24, r24
+ 1ca:	99 1f       	adc	r25, r25
+ 1cc:	aa 1f       	adc	r26, r26
+ 1ce:	bb 1f       	adc	r27, r27
+ 1d0:	82 1b       	sub	r24, r18
+ 1d2:	93 0b       	sbc	r25, r19
+ 1d4:	a4 0b       	sbc	r26, r20
+ 1d6:	b5 0b       	sbc	r27, r21
+ 1d8:	6c 01       	movw	r12, r24
+ 1da:	7d 01       	movw	r14, r26
+ 1dc:	cc 0c       	add	r12, r12
+ 1de:	dd 1c       	adc	r13, r13
+ 1e0:	ee 1c       	adc	r14, r14
+ 1e2:	ff 1c       	adc	r15, r15
+ 1e4:	c7 01       	movw	r24, r14
+ 1e6:	b6 01       	movw	r22, r12
+ 1e8:	62 0f       	add	r22, r18
+ 1ea:	73 1f       	adc	r23, r19
+ 1ec:	84 1f       	adc	r24, r20
+ 1ee:	95 1f       	adc	r25, r21
+ 1f0:	24 eb       	ldi	r18, 0xB4	; 180
+ 1f2:	34 e1       	ldi	r19, 0x14	; 20
+ 1f4:	40 e0       	ldi	r20, 0x00	; 0
+ 1f6:	50 e0       	ldi	r21, 0x00	; 0
+ 1f8:	4c d0       	rcall	.+152    	; 0x292 <__udivmodsi4>
+		if (pwm_value > MAX_PWM) {
+ 1fa:	2f 3f       	cpi	r18, 0xFF	; 255
+ 1fc:	31 05       	cpc	r19, r1
+ 1fe:	41 05       	cpc	r20, r1
+ 200:	51 05       	cpc	r21, r1
+ 202:	29 f0       	breq	.+10     	; 0x20e <__DATA_REGION_LENGTH__+0xe>
+ 204:	20 f0       	brcs	.+8      	; 0x20e <__DATA_REGION_LENGTH__+0xe>
+			pwm_value = MAX_PWM;
+ 206:	2f ef       	ldi	r18, 0xFF	; 255
+ 208:	30 e0       	ldi	r19, 0x00	; 0
+ 20a:	40 e0       	ldi	r20, 0x00	; 0
+ 20c:	50 e0       	ldi	r21, 0x00	; 0
+		}
+		OCR0A = pwm_value;  // Aplicar o PWM no PB0
+ 20e:	29 bd       	out	0x29, r18	; 41
+
+		// Resetar contadores
+		count = 0;
+ 210:	10 92 64 00 	sts	0x0064, r1	; 0x800064 <count>
+ 214:	10 92 65 00 	sts	0x0065, r1	; 0x800065 <count+0x1>
+ 218:	10 92 66 00 	sts	0x0066, r1	; 0x800066 <count+0x2>
+ 21c:	10 92 67 00 	sts	0x0067, r1	; 0x800067 <count+0x3>
+	}
+}
+ 220:	ff 91       	pop	r31
+ 222:	ef 91       	pop	r30
+ 224:	bf 91       	pop	r27
+ 226:	af 91       	pop	r26
+ 228:	9f 91       	pop	r25
+ 22a:	8f 91       	pop	r24
+ 22c:	7f 91       	pop	r23
+ 22e:	6f 91       	pop	r22
+ 230:	5f 91       	pop	r21
+ 232:	4f 91       	pop	r20
+ 234:	3f 91       	pop	r19
+ 236:	2f 91       	pop	r18
+ 238:	ff 90       	pop	r15
+ 23a:	ef 90       	pop	r14
+ 23c:	df 90       	pop	r13
+ 23e:	cf 90       	pop	r12
+ 240:	0f 90       	pop	r0
+ 242:	0f be       	out	0x3f, r0	; 63
+ 244:	0f 90       	pop	r0
+ 246:	1f 90       	pop	r1
+ 248:	18 95       	reti
+
+0000024a <adc_init>:
+
+void adc_init() {
+	// Selecionar Vref = AVcc e selecionar o canal ADC3 (PB3)
+	ADMUX = 0b00000011;
+ 24a:	83 e0       	ldi	r24, 0x03	; 3
+ 24c:	87 b9       	out	0x07, r24	; 7
+	
+	// Habilitar o ADC, definir o prescaler para 64 (1MHz/64 = 15625Hz)
+	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1);
+ 24e:	86 e8       	ldi	r24, 0x86	; 134
+ 250:	86 b9       	out	0x06, r24	; 6
+ 252:	08 95       	ret
+
+00000254 <adc_read>:
+}
+
+uint16_t adc_read() {
+	// Iniciar a conversão
+	ADCSRA |= (1 << ADSC);
+ 254:	86 b1       	in	r24, 0x06	; 6
+ 256:	80 64       	ori	r24, 0x40	; 64
+ 258:	86 b9       	out	0x06, r24	; 6
+	
+	// Aguardar a conversão completar
+	while (ADCSRA & (1 << ADSC));
+ 25a:	36 99       	sbic	0x06, 6	; 6
+ 25c:	fe cf       	rjmp	.-4      	; 0x25a <adc_read+0x6>
+	
+	// Retornar o valor ADC (10 bits)
+	return ADC;
+ 25e:	84 b1       	in	r24, 0x04	; 4
+ 260:	95 b1       	in	r25, 0x05	; 5
+}
+ 262:	08 95       	ret
+
+00000264 <main>:
+
+
+int main(void) {
+	adc_init();
+ 264:	f2 df       	rcall	.-28     	; 0x24a <adc_init>
+	Timer1_init();
+ 266:	ec de       	rcall	.-552    	; 0x40 <Timer1_init>
+	Timer0_init();
+ 268:	f4 de       	rcall	.-536    	; 0x52 <Timer0_init>
+
+	// Configurar PB2 (INT0) como entrada e ativar o pull-up interno
+	DDRB &= ~(1 << PB2);
+ 26a:	87 b3       	in	r24, 0x17	; 23
+ 26c:	8b 7f       	andi	r24, 0xFB	; 251
+ 26e:	87 bb       	out	0x17, r24	; 23
+	PORTB |= (1 << PB2);
+ 270:	88 b3       	in	r24, 0x18	; 24
+ 272:	84 60       	ori	r24, 0x04	; 4
+ 274:	88 bb       	out	0x18, r24	; 24
+
+	// Configurar a interrupção externa no PB2 (INT0) para borda de subida
+	MCUCR |= (1 << ISC00) | (1 << ISC01);  // Configura INT0 para borda de subida
+ 276:	85 b7       	in	r24, 0x35	; 53
+ 278:	83 60       	ori	r24, 0x03	; 3
+ 27a:	85 bf       	out	0x35, r24	; 53
+	GIMSK |= (1 << INT0);  // Habilita a interrupção INT0
+ 27c:	8b b7       	in	r24, 0x3b	; 59
+ 27e:	80 64       	ori	r24, 0x40	; 64
+ 280:	8b bf       	out	0x3b, r24	; 59
+
+	// Habilitar interrupções globais
+	sei();
+ 282:	78 94       	sei
+
+	
+	while (1) {
+		// Ler o valor do ADC (0-1023)
+		uint16_t adc_value = adc_read();
+ 284:	e7 df       	rcall	.-50     	; 0x254 <adc_read>
+		
+		// Converter o valor ADC para 0-255 (8 bits)
+		uint8_t valor_motor = adc_value >> 2;  // Equivalente a dividir por 4
+ 286:	96 95       	lsr	r25
+ 288:	87 95       	ror	r24
+ 28a:	96 95       	lsr	r25
+ 28c:	87 95       	ror	r24
+		
+		// Definir o valor do PWM
+		OCR0B = valor_motor;
+ 28e:	88 bd       	out	0x28, r24	; 40
+ 290:	f9 cf       	rjmp	.-14     	; 0x284 <main+0x20>
+
+00000292 <__udivmodsi4>:
+ 292:	a1 e2       	ldi	r26, 0x21	; 33
+ 294:	1a 2e       	mov	r1, r26
+ 296:	aa 1b       	sub	r26, r26
+ 298:	bb 1b       	sub	r27, r27
+ 29a:	fd 01       	movw	r30, r26
+ 29c:	0d c0       	rjmp	.+26     	; 0x2b8 <__udivmodsi4_ep>
+
+0000029e <__udivmodsi4_loop>:
+ 29e:	aa 1f       	adc	r26, r26
+ 2a0:	bb 1f       	adc	r27, r27
+ 2a2:	ee 1f       	adc	r30, r30
+ 2a4:	ff 1f       	adc	r31, r31
+ 2a6:	a2 17       	cp	r26, r18
+ 2a8:	b3 07       	cpc	r27, r19
+ 2aa:	e4 07       	cpc	r30, r20
+ 2ac:	f5 07       	cpc	r31, r21
+ 2ae:	20 f0       	brcs	.+8      	; 0x2b8 <__udivmodsi4_ep>
+ 2b0:	a2 1b       	sub	r26, r18
+ 2b2:	b3 0b       	sbc	r27, r19
+ 2b4:	e4 0b       	sbc	r30, r20
+ 2b6:	f5 0b       	sbc	r31, r21
+
+000002b8 <__udivmodsi4_ep>:
+ 2b8:	66 1f       	adc	r22, r22
+ 2ba:	77 1f       	adc	r23, r23
+ 2bc:	88 1f       	adc	r24, r24
+ 2be:	99 1f       	adc	r25, r25
+ 2c0:	1a 94       	dec	r1
+ 2c2:	69 f7       	brne	.-38     	; 0x29e <__udivmodsi4_loop>
+ 2c4:	60 95       	com	r22
+ 2c6:	70 95       	com	r23
+ 2c8:	80 95       	com	r24
+ 2ca:	90 95       	com	r25
+ 2cc:	9b 01       	movw	r18, r22
+ 2ce:	ac 01       	movw	r20, r24
+ 2d0:	bd 01       	movw	r22, r26
+ 2d2:	cf 01       	movw	r24, r30
+ 2d4:	08 95       	ret
+
+000002d6 <_exit>:
+ 2d6:	f8 94       	cli
+
+000002d8 <__stop_program>:
+ 2d8:	ff cf       	rjmp	.-2      	; 0x2d8 <__stop_program>
